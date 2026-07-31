@@ -128,6 +128,24 @@ body{font-family:'Noto Serif SC',Georgia,serif;background:var(--bg-base);color:v
 .wb-detail{background:var(--pink-50);border-radius:12px;padding:14px;margin:4px 0 8px;font-size:12px;line-height:1.8;color:var(--text-secondary);display:none}
 .wb-detail.show{display:block}
 .wb-detail .ielts-box{background:linear-gradient(135deg,#E8EAF6,#F3E5F5);border-radius:8px;padding:8px 10px;margin-top:8px}
+.roots-category{margin-bottom:20px}
+.roots-cat-title{font-size:14px;font-weight:500;color:var(--pink-500);padding:8px 0;border-bottom:1px solid var(--border-light);margin-bottom:8px}
+.root-item{background:var(--bg-card);border-radius:14px;padding:14px 16px;margin-bottom:8px;border:1px solid var(--border-light);cursor:pointer;transition:all .15s}
+.root-item.high{background:var(--pink-100);border-color:var(--pink-300)}
+.root-freq{font-size:10px;padding:1px 6px;border-radius:6px;margin-left:6px;vertical-align:middle}
+.root-freq.high{background:var(--pink-400);color:#fff}
+.root-freq.normal{background:var(--pink-100);color:var(--pink-500)}
+.root-item:active{transform:scale(0.98)}
+.root-header{display:flex;justify-content:space-between;align-items:center}
+.root-name{font-size:16px;font-weight:500;color:var(--text-primary)}
+.root-meaning{font-size:13px;color:var(--pink-500)}
+.root-words{display:none;margin-top:12px;padding-top:10px;border-top:1px solid var(--pink-50)}
+.root-words.show{display:block}
+.root-word-item{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:13px}
+.root-word-item .rw-en{font-weight:500;color:var(--text-primary)}
+.root-word-item .rw-cn{color:var(--text-muted)}
+.root-word-item .rw-split{font-size:11px;color:var(--text-secondary);margin-top:1px}
+.root-tip{font-size:12px;color:var(--text-secondary);margin-top:8px;padding:8px 12px;background:var(--pink-50);border-radius:10px;line-height:1.7}
 </style>
 </head>
 <body>
@@ -168,6 +186,7 @@ function render(page,data){
     case 'progress':renderProgress();break;
     case 'errors':renderErrors();break;
     case 'wordbook':renderWordbook();break;
+    case 'roots':renderRoots();break;
     default:renderHome()
   }
 }
@@ -218,6 +237,10 @@ function renderHome(){
       <div class="menu-card" onclick="render('errors')">
         <div class="menu-icon errors">错词</div>
         <div class="menu-info"><h3>错词本</h3><p>${getErrorWords().length>0?getErrorWords().length+'个词需要加强':'暂无错词'}</p></div>
+      </div>
+      <div class="menu-card" onclick="render('roots')">
+        <div class="menu-icon" style="background:linear-gradient(135deg,#FFF3E0,var(--pink-50))">词根</div>
+        <div class="menu-info"><h3>词根密码</h3><p>拆词认词的万能钥匙</p></div>
       </div>
       <div style="display:flex;gap:10px;margin-top:12px">
         <div class="menu-card" style="flex:1;margin-bottom:0" onclick="exportData()">
@@ -511,6 +534,257 @@ function importData(e){
     }catch(err){alert('文件读取失败，请检查文件')}
   };reader.readAsText(file);
   e.target.value='';
+}
+
+const ROOT_DATA={'常用前缀':[
+{root:'re-',meaning:'再次、回到',freq:'high',tip:'看到re-开头，就想"再来一次"',words:[
+{en:'renovation',cn:'翻新',split:'re(再)+nov(新)+ation'},
+{en:'refund',cn:'退款',split:'re(回)+fund(资金)'},
+{en:'recycle',cn:'回收利用',split:'re(再)+cycle(循环)'},
+{en:'review',cn:'复习、评论',split:'re(再)+view(看)'}]},
+{root:'un-',meaning:'不、相反',freq:'high',tip:'最简单的否定前缀，加上就变反义',words:[
+{en:'unemployment',cn:'失业',split:'un(不)+employ(雇用)+ment'},
+{en:'uncomfortable',cn:'不舒服的',split:'un(不)+comfortable(舒服的)'},
+{en:'unusual',cn:'不寻常的',split:'un(不)+usual(通常的)'},
+{en:'unavoidable',cn:'不可避免的',split:'un(不)+avoidable(可避免的)'}]},
+{root:'pre-',meaning:'在……之前',freq:'high',tip:'preview就是提前看，prepare就是提前准备',words:[
+{en:'preview',cn:'预览',split:'pre(前)+view(看)'},
+{en:'predict',cn:'预测',split:'pre(前)+dict(说)'},
+{en:'prevent',cn:'预防',split:'pre(前)+vent(来)'},
+{en:'preserve',cn:'保护、保存',split:'pre(前)+serve(保持)'}]},
+{root:'dis-',meaning:'否定、分开',freq:'high',tip:'disagree就是不同意，disconnect就是断开',words:[
+{en:'disappear',cn:'消失',split:'dis(不)+appear(出现)'},
+{en:'disadvantage',cn:'劣势',split:'dis(不)+advantage(优势)'},
+{en:'discrimination',cn:'歧视',split:'dis(分)+crimin(区分)+ation'},
+{en:'distribute',cn:'分配',split:'dis(分)+tribute(给予)'}]},
+{root:'over-',meaning:'过度、超过',freq:'high',tip:'做跨境的你肯定知道overseas——海的那边',words:[
+{en:'overcrowded',cn:'过度拥挤的',split:'over(过度)+crowded(拥挤的)'},
+{en:'overseas',cn:'海外的',split:'over(越过)+seas(海)'},
+{en:'overcome',cn:'克服',split:'over(越过)+come(来)'},
+{en:'overlook',cn:'忽视、俯瞰',split:'over(越过)+look(看)'}]},
+{root:'inter-',meaning:'在……之间、相互',freq:'high',tip:'internet就是网络之间互联，interview就是互相看',words:[
+{en:'international',cn:'国际的',split:'inter(之间)+national(国家的)'},
+{en:'interact',cn:'互动',split:'inter(相互)+act(行动)'},
+{en:'interpret',cn:'口译、解读',split:'inter(之间)+pret(理解)'},
+{en:'interfere',cn:'干涉',split:'inter(之间)+fere(打击)'}]},
+{root:'trans-',meaning:'穿越、转变',freq:'high',tip:'transport就是运过去，transfer就是转过去',words:[
+{en:'transport',cn:'运输',split:'trans(越过)+port(搬运)'},
+{en:'transform',cn:'改变',split:'trans(转)+form(形式)'},
+{en:'translate',cn:'翻译',split:'trans(转)+late(带)'},
+{en:'transparent',cn:'透明的',split:'trans(穿过)+parent(显现)'}]},
+{root:'ex-',meaning:'向外、前任',freq:'high',tip:'export就是运出去，跨境人最熟的词',words:[
+{en:'export',cn:'出口',split:'ex(外)+port(搬运)'},
+{en:'expand',cn:'扩张',split:'ex(外)+pand(展开)'},
+{en:'expose',cn:'暴露',split:'ex(外)+pose(放置)'},
+{en:'extinct',cn:'灭绝的',split:'ex(外)+tinct(刺灭)'}]},
+{root:'mis-',meaning:'错误地',freq:'normal',tip:'mistake就是"拿错了"，理解就是"搞错了"',words:[
+{en:'misleading',cn:'误导的',split:'mis(错)+leading(引导的)'},
+{en:'misunderstand',cn:'误解',split:'mis(错)+understand(理解)'},
+{en:'misuse',cn:'滥用',split:'mis(错)+use(使用)'}]},
+{root:'sub-',meaning:'在……下面',freq:'normal',tip:'subway地下的路，subtitle字幕在下面',words:[
+{en:'suburb',cn:'郊区',split:'sub(下)+urb(城市)'},
+{en:'submit',cn:'提交',split:'sub(下)+mit(送)'},
+{en:'substance',cn:'物质',split:'sub(下)+stance(站立)'},
+{en:'substitute',cn:'替代',split:'sub(下)+stitute(放置)'}]},
+{root:'co-/com-/con-',meaning:'一起、共同',freq:'high',tip:'cooperate一起合作，community一起生活的社区',words:[
+{en:'cooperate',cn:'合作',split:'co(一起)+operate(运作)'},
+{en:'community',cn:'社区',split:'com(一起)+munity(服务)'},
+{en:'contribute',cn:'贡献',split:'con(一起)+tribute(给予)'},
+{en:'communicate',cn:'交流',split:'com(一起)+munic(共享)+ate'}]},
+{root:'anti-',meaning:'反对、对抗',freq:'normal',tip:'antibiotics就是对抗细菌的——抗生素',words:[
+{en:'antibiotics',cn:'抗生素',split:'anti(对抗)+bio(生命)+tics'},
+{en:'antisocial',cn:'反社会的',split:'anti(反)+social(社会的)'},
+{en:'antique',cn:'古董',split:'anti(古老)+que'}]},
+{root:'auto-',meaning:'自己',freq:'normal',tip:'automatic自动的——自己动',words:[
+{en:'automatic',cn:'自动的',split:'auto(自己)+matic'},
+{en:'automobile',cn:'汽车',split:'auto(自己)+mobile(移动)'},
+{en:'autonomous',cn:'自治的',split:'auto(自己)+nomous(管理)'}]},
+{root:'multi-',meaning:'多',freq:'normal',tip:'multimedia多媒体，multicultural多元文化',words:[
+{en:'multicultural',cn:'多元文化的',split:'multi(多)+cultural(文化的)'},
+{en:'multiply',cn:'乘、增加',split:'multi(多)+ply(倍)'},
+{en:'multimedia',cn:'多媒体',split:'multi(多)+media(媒体)'}]},
+{root:'post-',meaning:'在……之后',freq:'normal',tip:'postpone就是往后推——推迟',words:[
+{en:'postpone',cn:'推迟',split:'post(后)+pone(放)'},
+{en:'postgraduate',cn:'研究生',split:'post(后)+graduate(毕业)'},
+{en:'postwar',cn:'战后的',split:'post(后)+war(战争)'}]},
+{root:'bio-',meaning:'生命',freq:'normal',tip:'biology生命的学问——生物学',words:[
+{en:'biology',cn:'生物学',split:'bio(生命)+logy(学科)'},
+{en:'biography',cn:'传记',split:'bio(生命)+graph(写)+y'},
+{en:'biodiversity',cn:'生物多样性',split:'bio(生命)+diversity(多样性)'}]},
+{root:'eco-',meaning:'生态、经济',freq:'normal',tip:'ecosystem生态系统，economy经济——都是eco',words:[
+{en:'ecosystem',cn:'生态系统',split:'eco(生态)+system(系统)'},
+{en:'ecology',cn:'生态学',split:'eco(生态)+logy(学科)'},
+{en:'economy',cn:'经济',split:'eco(管理)+nomy(规则)'}]}
+],'核心词根':[
+{root:'port',meaning:'搬运、带',freq:'high',tip:'你做跨境的，import/export天天见，port就是港口',words:[
+{en:'import',cn:'进口',split:'im(进)+port(搬运)'},
+{en:'export',cn:'出口',split:'ex(出)+port(搬运)'},
+{en:'portable',cn:'便携的',split:'port(搬运)+able(能)'},
+{en:'transportation',cn:'交通运输',split:'trans(越过)+port(搬运)+ation'}]},
+{root:'duct/duc',meaning:'引导、带领',freq:'high',tip:'conductor就是乐队指挥——引导音乐的人',words:[
+{en:'produce',cn:'生产',split:'pro(向前)+duce(引导)'},
+{en:'reduce',cn:'减少',split:'re(回)+duce(引导)'},
+{en:'introduce',cn:'介绍',split:'intro(向内)+duce(引导)'},
+{en:'education',cn:'教育',split:'e(出)+duc(引导)+ation'}]},
+{root:'spect',meaning:'看',freq:'high',tip:'spectacles就是眼镜——帮你看东西的工具',words:[
+{en:'inspect',cn:'检查',split:'in(向内)+spect(看)'},
+{en:'perspective',cn:'视角',split:'per(通过)+spect(看)+ive'},
+{en:'respect',cn:'尊重',split:'re(再)+spect(看)'},
+{en:'suspect',cn:'怀疑',split:'su(下)+spect(看)'}]},
+{root:'dict/dic',meaning:'说、宣布',freq:'high',tip:'dictionary就是"说话的书"——词典',words:[
+{en:'predict',cn:'预测',split:'pre(前)+dict(说)'},
+{en:'contradict',cn:'矛盾',split:'contra(相反)+dict(说)'},
+{en:'indicate',cn:'指示',split:'in(向)+dic(说)+ate'},
+{en:'dedicate',cn:'致力于',split:'de(向下)+dic(说)+ate'}]},
+{root:'struct',meaning:'建造',freq:'high',tip:'结构structure就是建造出来的东西',words:[
+{en:'construct',cn:'建设',split:'con(一起)+struct(建造)'},
+{en:'destroy',cn:'摧毁',split:'de(向下)+stroy(建造→拆毁)'},
+{en:'infrastructure',cn:'基础设施',split:'infra(下面)+struct(建造)+ure'},
+{en:'instruct',cn:'指导',split:'in(向内)+struct(建造)'}]},
+{root:'ject',meaning:'投、扔',freq:'high',tip:'project就是往前扔——投射出想法',words:[
+{en:'reject',cn:'拒绝',split:'re(回)+ject(扔)'},
+{en:'inject',cn:'注射',split:'in(进)+ject(扔)'},
+{en:'objective',cn:'客观的、目标',split:'ob(朝向)+ject(扔)+ive'},
+{en:'subject',cn:'主题、科目',split:'sub(下)+ject(扔)'}]},
+{root:'mit/miss',meaning:'送、发',freq:'high',tip:'submit就是从下面送上去——提交',words:[
+{en:'submit',cn:'提交',split:'sub(下)+mit(送)'},
+{en:'commit',cn:'承诺、犯罪',split:'com(一起)+mit(送)'},
+{en:'permit',cn:'允许',split:'per(通过)+mit(送)'},
+{en:'emission',cn:'排放',split:'e(出)+miss(送)+ion'}]},
+{root:'rupt',meaning:'破裂',freq:'high',tip:'bankrupt就是银行破了——破产',words:[
+{en:'interrupt',cn:'打断',split:'inter(之间)+rupt(破裂)'},
+{en:'corrupt',cn:'腐败的',split:'cor(一起)+rupt(破裂)'},
+{en:'erupt',cn:'爆发',split:'e(出)+rupt(破裂)'},
+{en:'disrupt',cn:'扰乱',split:'dis(分)+rupt(破裂)'}]},
+{root:'ced/cess',meaning:'走、让步',freq:'high',tip:'proceed就是往前走，access就是走进去',words:[
+{en:'proceed',cn:'继续进行',split:'pro(向前)+ceed(走)'},
+{en:'access',cn:'进入、获取',split:'ac(向)+cess(走)'},
+{en:'exceed',cn:'超过',split:'ex(超出)+ceed(走)'},
+{en:'process',cn:'过程',split:'pro(向前)+cess(走)'}]},
+{root:'scrib/script',meaning:'写',freq:'normal',tip:'subscribe就是在下面写名字——订阅',words:[
+{en:'describe',cn:'描述',split:'de(向下)+scribe(写)'},
+{en:'subscribe',cn:'订阅',split:'sub(下)+scribe(写)'},
+{en:'prescription',cn:'处方',split:'pre(前)+script(写)+ion'},
+{en:'manuscript',cn:'手稿',split:'manu(手)+script(写)'}]},
+{root:'vis/vid',meaning:'看',freq:'normal',tip:'visible看得见的，video用来看的东西',words:[
+{en:'visible',cn:'可见的',split:'vis(看)+ible(能)'},
+{en:'evidence',cn:'证据',split:'e(出)+vid(看)+ence'},
+{en:'visual',cn:'视觉的',split:'vis(看)+ual'},
+{en:'supervise',cn:'监督',split:'super(上)+vise(看)'}]},
+{root:'fer',meaning:'带、搬运',freq:'normal',tip:'transfer就是转移过去——带过去',words:[
+{en:'transfer',cn:'转移',split:'trans(越过)+fer(带)'},
+{en:'prefer',cn:'更喜欢',split:'pre(前)+fer(带)'},
+{en:'refer',cn:'参考、提及',split:'re(回)+fer(带)'},
+{en:'differ',cn:'不同',split:'dif(分开)+fer(带)'}]},
+{root:'pend/pens',meaning:'挂、花费、称量',freq:'normal',tip:'spend花钱，depend依靠——挂在别人身上',words:[
+{en:'depend',cn:'依靠',split:'de(向下)+pend(挂)'},
+{en:'independent',cn:'独立的',split:'in(不)+de(下)+pend(挂)+ent'},
+{en:'expense',cn:'费用',split:'ex(出)+pense(花费)'},
+{en:'compensate',cn:'补偿',split:'com(一起)+pens(称量)+ate'}]},
+{root:'gen',meaning:'产生、种类',freq:'normal',tip:'generate产生，gene基因——生命的种子',words:[
+{en:'generate',cn:'产生',split:'gen(产生)+erate'},
+{en:'generation',cn:'一代人',split:'gen(产生)+eration'},
+{en:'genetic',cn:'基因的',split:'gen(基因)+etic'},
+{en:'gender',cn:'性别',split:'gen(种类)+der'}]},
+{root:'graph/gram',meaning:'写、画',freq:'normal',tip:'photograph就是用光来"写"——拍照',words:[
+{en:'geography',cn:'地理',split:'geo(地)+graph(写)'},
+{en:'biography',cn:'传记',split:'bio(生命)+graph(写)'},
+{en:'program',cn:'项目、程序',split:'pro(前)+gram(写)'},
+{en:'diagram',cn:'图表',split:'dia(穿过)+gram(写)'}]},
+{root:'nov/new',meaning:'新的',freq:'normal',tip:'renovation翻新、innovation创新，都是"新"',words:[
+{en:'novel',cn:'小说、新奇的',split:'nov(新)+el'},
+{en:'innovation',cn:'创新',split:'in(进)+nov(新)+ation'},
+{en:'renovation',cn:'翻新',split:'re(再)+nov(新)+ation'},
+{en:'renewable',cn:'可再生的',split:'re(再)+new(新)+able(能)'}]},
+{root:'voc/vok',meaning:'声音、叫',freq:'normal',tip:'vocabulary就是你的"声音库"——词汇量',words:[
+{en:'vocabulary',cn:'词汇量',split:'voc(声音)+abulary'},
+{en:'advocate',cn:'提倡',split:'ad(向)+voc(叫)+ate'},
+{en:'provoke',cn:'激怒',split:'pro(向前)+voke(叫)'}]},
+{root:'cred',meaning:'相信',freq:'normal',tip:'credit信用卡——别人相信你会还钱',words:[
+{en:'credit',cn:'信用、学分',split:'cred(相信)+it'},
+{en:'incredible',cn:'不可思议的',split:'in(不)+cred(相信)+ible(能)'},
+{en:'credible',cn:'可信的',split:'cred(相信)+ible(能)'}]}
+],'常用后缀':[
+{root:'-tion/-sion',meaning:'名词（动作/状态）',freq:'high',tip:'动词变名词最常见的方式，educate→education',words:[
+{en:'pollution',cn:'污染',split:'pollute→pollution'},
+{en:'education',cn:'教育',split:'educate→education'},
+{en:'decision',cn:'决定',split:'decide→decision'},
+{en:'innovation',cn:'创新',split:'innovate→innovation'}]},
+{root:'-ment',meaning:'名词（结果/状态）',freq:'high',tip:'develop发展→development发展结果',words:[
+{en:'environment',cn:'环境',split:'environ(围绕)+ment'},
+{en:'government',cn:'政府',split:'govern(治理)+ment'},
+{en:'employment',cn:'就业',split:'employ(雇用)+ment'},
+{en:'achievement',cn:'成就',split:'achieve(达成)+ment'}]},
+{root:'-able/-ible',meaning:'能够被……的',freq:'high',tip:'sustainable就是能被sustain的——可持续的',words:[
+{en:'sustainable',cn:'可持续的',split:'sustain(维持)+able'},
+{en:'renewable',cn:'可再生的',split:'renew(更新)+able'},
+{en:'accessible',cn:'可进入的',split:'access(进入)+ible'},
+{en:'flexible',cn:'灵活的',split:'flex(弯曲)+ible'}]},
+{root:'-ful / -less',meaning:'充满 / 没有',freq:'high',tip:'一对反义后缀，careful小心的，careless粗心的',words:[
+{en:'harmful',cn:'有害的',split:'harm(伤害)+ful(充满)'},
+{en:'harmless',cn:'无害的',split:'harm(伤害)+less(没有)'},
+{en:'meaningful',cn:'有意义的',split:'meaning(意义)+ful'},
+{en:'homeless',cn:'无家可归的',split:'home(家)+less(没有)'}]},
+{root:'-ize/-ise',meaning:'使……变成',freq:'high',tip:'modern现代的→modernize使现代化',words:[
+{en:'globalize',cn:'全球化',split:'global(全球的)+ize'},
+{en:'urbanize',cn:'城市化',split:'urban(城市的)+ize'},
+{en:'recognize',cn:'认出',split:'re(再)+cogn(知道)+ize'},
+{en:'minimize',cn:'最小化',split:'minim(最小)+ize'}]},
+{root:'-al/-ial',meaning:'形容词（与……有关的）',freq:'high',tip:'nation国家→national国家的',words:[
+{en:'environmental',cn:'环境的',split:'environment(环境)+al'},
+{en:'traditional',cn:'传统的',split:'tradition(传统)+al'},
+{en:'commercial',cn:'商业的',split:'commerce(商业)+ial'},
+{en:'industrial',cn:'工业的',split:'industry→industrial'}]},
+{root:'-ness',meaning:'名词（性质/状态）',freq:'normal',tip:'形容词变名词，happy→happiness',words:[
+{en:'awareness',cn:'意识',split:'aware(意识到的)+ness'},
+{en:'effectiveness',cn:'有效性',split:'effective(有效的)+ness'},
+{en:'illness',cn:'疾病',split:'ill(生病的)+ness'},
+{en:'weakness',cn:'弱点',split:'weak(弱的)+ness'}]},
+{root:'-ous/-ious',meaning:'形容词（充满……的）',freq:'normal',tip:'danger危险→dangerous危险的',words:[
+{en:'dangerous',cn:'危险的',split:'danger(危险)+ous'},
+{en:'continuous',cn:'持续的',split:'continu(继续)+ous'},
+{en:'previous',cn:'之前的',split:'previ(前)+ous'},
+{en:'conscious',cn:'有意识的',split:'consci(知道)+ous'}]},
+{root:'-ity/-ty',meaning:'名词（性质/状态）',freq:'normal',tip:'diverse多样的→diversity多样性',words:[
+{en:'diversity',cn:'多样性',split:'diverse(多样的)+ity'},
+{en:'electricity',cn:'电力',split:'electric(电的)+ity'},
+{en:'majority',cn:'多数',split:'major(主要的)+ity'},
+{en:'security',cn:'安全',split:'secure(安全的)+ity'}]},
+{root:'-ly',meaning:'副词（……地）',freq:'normal',tip:'形容词加-ly变副词，quick→quickly',words:[
+{en:'significantly',cn:'显著地',split:'significant(显著的)+ly'},
+{en:'approximately',cn:'大约',split:'approximate(大约的)+ly'},
+{en:'increasingly',cn:'越来越',split:'increasing(增加的)+ly'},
+{en:'consequently',cn:'因此',split:'consequent(随之的)+ly'}]}
+]};
+
+function renderRoots(){
+  let html=`<div class="header"><button class="back-btn" onclick="render('home')">←</button><h1>词根密码</h1><div class="subtitle">拆开单词看本质</div></div><div class="container">`;
+  html+=`<div style="display:flex;gap:8px;margin-bottom:16px;font-size:12px;color:var(--text-muted);align-items:center"><span class="root-freq high">高频</span>雅思必考<span style="margin-left:8px" class="root-freq normal">拓展</span>认识即可</div>`;
+  const cats=Object.keys(ROOT_DATA);
+  cats.forEach(cat=>{
+    html+=`<div class="roots-category"><div class="roots-cat-title">${cat}</div>`;
+    ROOT_DATA[cat].forEach((item,i)=>{
+      const id=cat+'_'+i;
+      const f=item.freq||'normal';
+      html+=`<div class="root-item ${f}" onclick="toggleRoot('${id}')">
+        <div class="root-header"><span class="root-name">${item.root}<span class="root-freq ${f}">${f==='high'?'高频':'拓展'}</span></span><span class="root-meaning">${item.meaning}</span></div>
+        <div class="root-words" id="root_${id}">`;
+      item.words.forEach(w=>{
+        html+=`<div class="root-word-item" onclick="event.stopPropagation();speak('${w.en}')">
+          <div><div class="rw-en">${w.en}</div><div class="rw-split">${w.split}</div></div>
+          <div class="rw-cn">${w.cn}</div></div>`;
+      });
+      if(item.tip) html+=`<div class="root-tip">${item.tip}</div>`;
+      html+=`</div></div>`;
+    });
+    html+=`</div>`;
+  });
+  html+=`</div>`;
+  app.innerHTML=html;
+}
+function toggleRoot(id){
+  const el=document.getElementById('root_'+id);
+  if(el)el.classList.toggle('show');
 }
 
 render('home');
